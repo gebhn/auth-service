@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#
+# module - extract module name from a file
+#
+# useage:
+#
+# ./scripts/module go.mod
+
+IFS= read -r line < "$1"
+
+case "$line" in
+  module\ *)
+    echo "${line#module }"
+    ;;
+  *)
+    echo "$line"
+    ;;
+esac

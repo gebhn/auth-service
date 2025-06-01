@@ -5,6 +5,7 @@ GOBIN    := $(shell go env GOPATH)/bin
 GOSRC    := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 PROTOSRC := $(shell find . -type f -name '*.proto' -print)
 SQLSRC   := $(shell find . -type f -name '*.sql' -print)
+GOMOD    := $(shell ./scripts/module go.mod)
 
 GOGEN     := $(GOBIN)/protoc-gen-go
 GOGRPC    := $(GOBIN)/protoc-gen-go-grpc
@@ -85,7 +86,7 @@ $(MIGRATE):
 
 .PHONY: format
 format: $(GOIMPORTS)
-	GO111MODULE=on go list -f '{{.Dir}}' ./... | xargs $(GOIMPORTS) -w -local github.com/gebhn/auth-service
+	GO111MODULE=on go list -f '{{.Dir}}' ./... | xargs $(GOIMPORTS) -w -local $(GOMOD)
 
 .PHONY: migration
 migration: $(MIGRATE)

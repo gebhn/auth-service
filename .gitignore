@@ -27,3 +27,6 @@
 !cmd/
 !cmd/auth-service/
 !cmd/auth-service/*
+
+!scripts/
+!scripts/module
