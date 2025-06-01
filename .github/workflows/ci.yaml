@@ -14,29 +14,37 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: setup
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: 1.24
 
       - name: install dependencies
         run: |
           sudo apt update
-          sudo apt install -y protobuf-compiler protobuf-dev make
+          sudo apt install -y protobuf-compiler make
+
+      - name: update protoc
+        run: |
+          PROTOC_ZIP=protoc-29.4-linux-x86_64.zip
+          curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v29.4/$PROTOC_ZIP
+          sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc include/*
+          rm -f $PROTOC_ZIP
+          protoc --version
 
       - name: generate
         run: make generate
 
       - name: upload proto
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: proto
           path: ./api/pb
 
       - name: upload sqlc
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: sqlc
           path: ./internal/db/sqlc
@@ -49,10 +57,10 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: setup
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: 1.24
 
@@ -62,13 +70,13 @@ jobs:
           sudo apt install -y make
 
       - name: download proto
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: proto
           path: ./api/pb
 
       - name: download sqlc
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: sqlc
           path: ./internal/db/sqlc
