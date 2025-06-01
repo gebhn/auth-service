@@ -1,0 +1,65 @@
+Auth Service
+________________________________________________________________________________
+
+A service for managing JWTs (JavaScript Web Tokens).
+
+[000] Index
+________________________________________________________________________________
+
+* Dependencies ........................................................... [001]
+* Building ............................................................... [002]
+* Testing ................................................................ [003]
+* Contributing ........................................................... [004]
+* License ................................................................ [005]
+
+[001] Dependencies
+________________________________________________________________________________
+
+* Go       [https://go.dev/learn/]
+* Make     [https://www.gnu.org/software/make/]
+* Protobuf [https://protobuf.dev/installation/]
+
+Additionally, to run the service(s), your environment must have all mandatory
+environment variables present at runtime. See the `example.env` file.
+
+[002] Building
+________________________________________________________________________________
+
+Building the service requires you to first generate the types declared in the
+protocol definition, but assuming your environment is configured correctly the
+build process is very simple:
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|   $ git clone git@github.com/gebhn/auth-service.git                          |
+|   $ cd auth-service                                                          |
+|                                                                              |
+|   $ make generate                                                            |
+|   $ make build                                                               |
+|                                                                              |
+|   $ ./bin/auth-service # Runs the service                                    |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+[003] Testing
+________________________________________________________________________________
+
+Testing is similarly simple and also requires a valid .env file:
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|   $ make test         # To run unit tests                                    |
+|   $ make count=n test # To run unit tests n times                            |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+[004] Contributing
+________________________________________________________________________________
+
+Pull requests should be opened for review with individual commits and follow the
+conventional commits guidelines.
+
+[005] License
+________________________________________________________________________________
+
+The project is free and open source, available under the GPL License.

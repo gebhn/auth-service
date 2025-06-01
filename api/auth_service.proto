@@ -1,0 +1,152 @@
+edition = "2023";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./api/pb";
+
+service AuthService {
+  // Register enrolls a User as an entity which may request tokens from this
+  // service. Once a User has been registered, they may provide credentials to
+  // the Login RPC to begin requesting tokens.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+
+  // Login verifies the credentials provided by a User and responds in kind with
+  // both a Refresh token and an Access token, which may be used by various
+  // resource services to grant access.
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  // Verify confirms the validity of an Access token.
+  rpc Verify(VerifyRequest) returns (VerifyResponse) {}
+
+  // Refresh confirms the validity of a Refresh token and responds with a new
+  // Refresh Token as well as an Access Token for the associated user.
+  rpc Refresh(RefreshRequest) returns (RefreshResponse) {}
+
+  // RevokeAccess will revoke the provided Access Token.
+  rpc RevokeAccess(RevokeAccessRequest) returns (RevokeResponse) {}
+
+  // RevokeRefresh will revoke a single Refresh Token.
+  rpc RevokeRefresh(RevokeRefreshRequest) returns (RevokeResponse) {}
+
+  // RevokeAll will revoke all Refresh Tokens and Access Tokens for a given
+  // user.
+  rpc RevokeAll(RevokeAllRequest) returns (RevokeResponse) {}
+}
+
+enum TokenKind {
+  TOKEN_KIND_UNKNOWN = 0;
+  TOKEN_KIND_ACCESS = 1;
+  TOKEN_KIND_REFRESH = 2;
+  TOKEN_KIND_PASSWORD_RESET = 3;
+  TOKEN_KIND_EMAIL_VERIFICATION = 4;
+}
+
+enum RegisterStatus {
+  REGISTER_STATUS_UNKNOWN = 0;
+  REGISTER_STATUS_OK = 1;
+  REGISTER_STATUS_ERROR = 2;
+}
+
+enum LoginStatus {
+  LOGIN_STATUS_UNKNOWN = 0;
+  LOGIN_STATUS_OK = 1;
+  LOGIN_STATUS_ERROR = 2;
+}
+
+enum VerifyStatus {
+  VERIFY_STATUS_UNKNOWN = 0;
+  VERIFY_STATUS_OK = 1;
+  VERIFY_STATUS_ERROR = 2;
+  VERIFY_STATUS_TOKEN_EXPIRED = 3;
+  VERIFY_STATUS_TOKEN_INVALID = 4;
+}
+
+enum RefreshStatus {
+  REFRESH_STATUS_UNKNOWN = 0;
+  REFRESH_STATUS_OK = 1;
+  REFRESH_STATUS_ERROR = 2;
+  REFRESH_STATUS_TOKEN_EXPIRED = 3;
+  REFRESH_STATUS_TOKEN_INVALID = 4;
+}
+
+enum RevokeStatus {
+  REVOKE_STATUS_UNKNOWN = 0;
+  REVOKE_STATUS_OK = 1;
+  REVOKE_STATUS_ERROR = 2;
+}
+
+message User {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message Token {
+  TokenKind kind = 1;
+  string value = 2;
+  string jti = 3;
+  string subject = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  google.protobuf.Timestamp issued_at = 6;
+}
+
+message RegisterRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message RegisterResponse {
+  RegisterStatus status = 1;
+  User user = 2;
+}
+
+message LoginRequest {
+  oneof identifier {
+    string username = 1;
+    string email = 2;
+  }
+  string password = 3;
+}
+
+message LoginResponse {
+  LoginStatus status = 1;
+  Token access_token = 2;
+  Token refresh_token = 3;
+}
+
+message VerifyRequest {
+  Token access_token = 1;
+}
+
+message VerifyResponse {
+  VerifyStatus status = 1;
+  User user = 2;
+}
+
+message RefreshRequest {
+  Token refresh_token = 1;
+}
+
+message RefreshResponse {
+  RefreshStatus status = 1;
+  Token access_token = 2;
+  Token refresh_token = 3;
+}
+
+message RevokeRefreshRequest {
+  Token refresh_token = 1;
+}
+
+message RevokeAllRequest {
+  string user_id = 1;
+}
+
+message RevokeAccessRequest {
+  string jti = 1;
+}
+
+message RevokeResponse {
+  RevokeStatus status = 1;
+  google.protobuf.Timestamp revoked_at = 2;
+}

@@ -1,0 +1,77 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.24
+
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y protobuf-compiler protobuf-dev make
+
+      - name: generate
+        run: make generate
+
+      - name: upload proto
+        uses: actions/upload-artifact@v2
+        with:
+          name: proto
+          path: ./api/pb
+
+      - name: upload sqlc
+        uses: actions/upload-artifact@v2
+        with:
+          name: sqlc
+          path: ./internal/db/sqlc
+
+  test:
+    runs-on: ubuntu-latest
+    needs: generate
+    env:
+      GRPC_SERVER_PORT: "50051"
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.24
+
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y make
+
+      - name: download proto
+        uses: actions/download-artifact@v2
+        with:
+          name: proto
+          path: ./api/pb
+
+      - name: download sqlc
+        uses: actions/download-artifact@v2
+        with:
+          name: sqlc
+          path: ./internal/db/sqlc
+
+      - name: unit test
+        run: make test
