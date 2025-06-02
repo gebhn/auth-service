@@ -1,13 +1,12 @@
--- name: RevokeToken :exec
-insert into revoked_token (jti) values (?);
+-- name: CreateRevokedToken :one
+insert into revoked_tokens (jti) values (?)
+returning jti;
 
--- name: IsTokenRevoked :one
-select exists (
-  select 1 from revoked_token where jti = ?
-);
+-- name: GetRevokedTokenByJti :one
+select jti from revoked_tokens where jti = ? limit 1;
 
--- name: RevokeAllRefreshTokensForUser :exec
-insert into revoked_token (jti)
-select jti from token
-where user_id = ? and kind = 'refresh'
-on conflict(jti) do nothing;
+-- name: GetRevocableTokensByUser :many
+SELECT jti
+FROM tokens
+WHERE user_id = ? AND kind = 'refresh'
+ORDER BY issued_at DESC;

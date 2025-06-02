@@ -1,13 +1,12 @@
--- name: CreateToken :exec
-insert into token (jti, user_id, kind, value, issued_at, expires_at)
-values (?, ?, ?, ?, ?, ?);
-
--- name: GetValidToken :one
-select * from token
-where jti = ? and revoked = 0 and expires_at > CURRENT_TIMESTAMP;
+-- name: CreateToken :one
+insert into tokens (jti, user_id, kind, value, issued_at, expires_at)
+values (?, ?, ?, ?, ?, ?)
+returning *;
 
 -- name: GetTokenByJTI :one
-select * from token where jti = ?;
+select * from tokens
+where jti = ? and expires_at > current_timestamp;
 
 -- name: GetTokensForUser :many
-select * from token where user_id = ? order by issued_at desc;
+select * from tokens
+where user_id = ? and expires_at > current_timestamp order by issued_at desc;

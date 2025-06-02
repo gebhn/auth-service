@@ -1,3 +1,3 @@
-drop table if exists user;
-drop table if exists token;
-drop table if exists revoked_token;
+drop table if exists users;
+drop table if exists tokens;
+drop table if exists revoked_tokens;
