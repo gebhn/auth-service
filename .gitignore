@@ -28,5 +28,15 @@
 !cmd/auth-service/
 !cmd/auth-service/*
 
+!internal/
+!internal/auth/
+!internal/auth/*
+!internal/config/
+!internal/config/*
+!internal/db/
+!internal/db/*
+!internal/store/
+!internal/store/*
+
 !scripts/
 !scripts/module
