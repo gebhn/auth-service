@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/gebhn/auth-service/api/pb"
 	"github.com/gebhn/auth-service/internal/config"
 	"github.com/gebhn/auth-service/internal/db/sqlc"
 	"github.com/gebhn/auth-service/internal/store"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type tokenAuth struct {
