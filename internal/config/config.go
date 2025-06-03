@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func GetTursoDbUrl() string {
@@ -19,6 +20,26 @@ func GetGrpcServerPort() string {
 
 func GetMigrationDir() string {
 	return readEnvVar("MIGRATION_DIR", "file:///build/package/service/migrations/")
+}
+
+func GetServiceName() string {
+	return readEnvVar("SERVICE_NAME", "auth-service-1")
+}
+
+func GetRefreshTokenSecret() string {
+	return readEnvVar("REFRESH_TOKEN_SECRET", "keep-it-secret-keep-it-safe")
+}
+
+func GetAccessTokenSecret() string {
+	return readEnvVar("ACCESS_TOKEN_SECRET", "is-it-secret-?-is-it-safe-?")
+}
+
+func GetRefreshTokenDuration() time.Duration {
+	return time.Hour * 24 * 7
+}
+
+func GetAccessTokenDuration() time.Duration {
+	return time.Minute * 5
 }
 
 func readEnvVar(envVar, suggestion string) string {
