@@ -2,43 +2,30 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"log"
 
 	"github.com/gebhn/auth-service/internal/db/sqlc"
 )
 
-type userStore[P any, T any] struct {
-	queries   *sqlc.Queries
-	createFn  func(ctx context.Context, params P) (*T, error)
-	findOneFn func(ctx context.Context, params P) (*T, error)
+type UserStore struct {
+	conn    sqlc.DBTX
+	queries *sqlc.Queries
 }
 
-func NewUserStore(conn sqlc.DBTX) *userStore[sqlc.CreateUserParams, sqlc.User] {
-	s := &userStore[sqlc.CreateUserParams, sqlc.User]{
+func NewUserStore(conn sqlc.DBTX) *UserStore {
+	return &UserStore{
+		conn:    conn,
 		queries: sqlc.New(conn),
 	}
-	s.createFn = s.create
-	s.findOneFn = s.findOne
-
-	return s
 }
 
-func (s *userStore[P, T]) Create(ctx context.Context, params P) (*T, error) {
-	return s.createFn(ctx, params)
-}
-
-func (s *userStore[P, T]) FindOne(ctx context.Context, params P) (*T, error) {
-	return s.findOneFn(ctx, params)
-}
-
-func (s *userStore[P, T]) FindMany(ctx context.Context, params P) ([]*T, error) {
-	return nil, ErrNotImplemented
-}
-
-func (s *userStore[P, T]) create(ctx context.Context, params sqlc.CreateUserParams) (*sqlc.User, error) {
+func (s *UserStore) Create(ctx context.Context, params sqlc.CreateUserParams) (*sqlc.User, error) {
 	return s.queries.CreateUser(ctx, params)
 }
 
-func (s *userStore[P, T]) findOne(ctx context.Context, params sqlc.CreateUserParams) (*sqlc.User, error) {
+func (s *UserStore) FindOne(ctx context.Context, params sqlc.CreateUserParams) (*sqlc.User, error) {
 	switch {
 	case params.Email != "":
 		return s.queries.GetUserByEmail(ctx, params.Email)
@@ -49,4 +36,46 @@ func (s *userStore[P, T]) findOne(ctx context.Context, params sqlc.CreateUserPar
 	default:
 		return nil, ErrInvalidInput
 	}
+}
+
+func (s *UserStore) FindMany(ctx context.Context, params sqlc.CreateUserParams) ([]*sqlc.User, error) {
+	return nil, ErrNotImplemented
+}
+
+func (s *UserStore) WithTransaction(ctx context.Context, fn func(ts *UserStore) error) error {
+	conn, ok := s.conn.(*sql.DB)
+	if !ok {
+		return fmt.Errorf("cannot start a new transaction from an existing transaction store")
+	}
+
+	tx, err := conn.BeginTx(ctx, nil) // Start a new transaction
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	ts := NewUserStore(tx)
+
+	defer func() {
+		if r := recover(); r != nil {
+			if rbErr := tx.Rollback(); rbErr != nil {
+				log.Printf("panic during transaction, rollback failed: %v, original panic: %v", rbErr, r)
+			} else {
+				log.Printf("prror during transaction, rolled back: %v", r)
+			}
+			panic(r)
+		} else if err != nil {
+			if rbErr := tx.Rollback(); rbErr != nil {
+				log.Printf("error during transaction, rollback failed: %v, original error: %v", rbErr, err)
+			} else {
+				log.Printf("error during transaction, rolled back: %v", err)
+			}
+		}
+	}()
+
+	err = fn(ts)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
