@@ -31,10 +31,14 @@
 !internal/
 !internal/auth/
 !internal/auth/*
+!internal/cache/
+!internal/cache/*
 !internal/config/
 !internal/config/*
 !internal/db/
 !internal/db/*
+!internal/revoked/
+!internal/revoked/*
 !internal/store/
 !internal/store/*
 
