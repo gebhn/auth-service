@@ -4,6 +4,7 @@ go 1.24.3
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
+	github.com/redis/go-redis/v9 v9.9.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
@@ -11,7 +12,9 @@ require (
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.12 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
