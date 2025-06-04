@@ -3,11 +3,8 @@ module github.com/gebhn/auth-service
 go 1.24.3
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang-migrate/migrate/v4 v4.18.3
-	github.com/google/uuid v1.6.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
-	golang.org/x/crypto v0.38.0
 	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 )
@@ -15,6 +12,7 @@ require (
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/coder/websocket v1.8.12 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
