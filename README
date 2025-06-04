@@ -8,9 +8,10 @@ ________________________________________________________________________________
 
 * Dependencies ........................................................... [001]
 * Building ............................................................... [002]
-* Testing ................................................................ [003]
-* Contributing ........................................................... [004]
-* License ................................................................ [005]
+* Running  ............................................................... [003]
+* Testing ................................................................ [004]
+* Contributing ........................................................... [005]
+* License ................................................................ [006]
 
 [001] Dependencies
 ________________________________________________________________________________
@@ -18,6 +19,7 @@ ________________________________________________________________________________
 * Go       [https://go.dev/learn/]
 * Make     [https://www.gnu.org/software/make/]
 * Protobuf [https://protobuf.dev/installation/]
+* Redis    [https://github.com/redis/redis]
 
 Additionally, to run the service(s), your environment must have all mandatory
 environment variables present at runtime. See the `example.env` file.
@@ -40,6 +42,24 @@ build process is very simple:
 |   $ ./bin/auth-service # Runs the service                                    |
 |                                                                              |
 +------------------------------------------------------------------------------+
+
+[002] Running
+________________________________________________________________________________
+
+The service assumes access to a running instance of Redis and Libsql. You may
+wish to run these locally via Docker:
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|   $ docker run --name auth-redis -d -p 6379:6379 redis:latest                |
+|                                                                              |
+|   $ docker run --name auth-db -d -p 8080:8080 -ti -e SQLD_NODE=primary \     |
+|       ghcr.io/tursodatabase/libsql-server:latest                             |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+See the associated documentation for more information regarding Redis and Libsql
+respectively.
 
 [003] Testing
 ________________________________________________________________________________
