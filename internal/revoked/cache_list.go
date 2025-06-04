@@ -14,13 +14,21 @@ type cacheRevokedList struct {
 	c cache.Cache
 }
 
-func (l *cacheRevokedList) Create(ctx context.Context, jti string, kind pb.TokenKind exp time.Duration) error {
+func NewCacheRevokedList(c cache.Cache) *cacheRevokedList {
+	return &cacheRevokedList{c: c}
+}
+
+func (l *cacheRevokedList) Create(ctx context.Context, jti string, kind pb.TokenKind, exp time.Duration) error {
 	if jti == "" {
 		return ErrInvalidKey
 	}
-	if exp.Abs() <= config.GetAccessTokenDuration() {
+	if exp.Abs() < config.GetTokenDuration(kind) {
 		return ErrInvalidDuration
 	}
+	if _, err := l.c.Set(ctx, jti, "1", exp); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (l *cacheRevokedList) Find(ctx context.Context, jti string) (bool, error) {
