@@ -5,89 +5,109 @@ import "google/protobuf/timestamp.proto";
 option go_package = "./api/pb";
 
 service AuthService {
-  // Register enrolls a User as an entity which may request tokens from this
-  // service. Once a User has been registered, they may provide credentials to
-  // the Login RPC to begin requesting tokens.
+  // Register a new User.
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
 
-  // Login verifies the credentials provided by a User and responds in kind with
-  // both a Refresh token and an Access token, which may be used by various
-  // resource services to grant access.
+  // Login as a User and issue a new Token pair.
   rpc Login(LoginRequest) returns (LoginResponse) {}
 
-  // Verify confirms the validity of an Access token.
-  rpc Verify(VerifyRequest) returns (VerifyResponse) {}
+  // Logout as a User and invalidate one or more Refresh Token.
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {}
 
-  // Refresh confirms the validity of a Refresh token and responds with a new
-  // Refresh Token as well as an Access Token for the associated user.
+  // Update a User by changing their Username or Email.
+  rpc Update(UpdateRequest) returns (UpdateResponse) {}
+
+  // Invalidate the provided Refresh Token and issue a new Token pair.
   rpc Refresh(RefreshRequest) returns (RefreshResponse) {}
 
-  // RevokeAccess will revoke the provided Access Token.
-  rpc RevokeAccess(RevokeAccessRequest) returns (RevokeResponse) {}
+  // Respond with the Claims and User associated with an Access Token.
+  rpc Access(AccessRequest) returns (AccessResponse) {}
 
-  // RevokeRefresh will revoke a single Refresh Token.
-  rpc RevokeRefresh(RevokeRefreshRequest) returns (RevokeResponse) {}
-
-  // RevokeAll will revoke all Refresh Tokens and Access Tokens for a given
-  // user.
-  rpc RevokeAll(RevokeAllRequest) returns (RevokeResponse) {}
-}
-
-enum TokenKind {
-  TOKEN_KIND_UNKNOWN = 0;
-  TOKEN_KIND_ACCESS = 1;
-  TOKEN_KIND_REFRESH = 2;
-  TOKEN_KIND_PASSWORD_RESET = 3;
-  TOKEN_KIND_EMAIL_VERIFICATION = 4;
+  // Update a User by changing their Password.
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {}
 }
 
 enum RegisterStatus {
   REGISTER_STATUS_UNKNOWN = 0;
   REGISTER_STATUS_OK = 1;
-  REGISTER_STATUS_ERROR = 2;
+  REGISTER_STATUS_ERROR_UNKNOWN = 2;
+  REGISTER_STATUS_ERROR_USERNAME_TAKEN = 3;
+  REGISTER_STATUS_ERROR_EMAIL_TAKEN = 4;
 }
 
 enum LoginStatus {
   LOGIN_STATUS_UNKNOWN = 0;
   LOGIN_STATUS_OK = 1;
-  LOGIN_STATUS_ERROR = 2;
+  LOGIN_STATUS_ERROR_UNKNOWN = 2;
+  LOGIN_STATUS_ERROR_USERNAME_INVALID = 3;
+  LOGIN_STATUS_ERROR_EMAIL_INVALID = 4;
+  LOGIN_STATUS_ERROR_PASSWORD_INVALID = 5;
 }
 
-enum VerifyStatus {
-  VERIFY_STATUS_UNKNOWN = 0;
-  VERIFY_STATUS_OK = 1;
-  VERIFY_STATUS_ERROR = 2;
-  VERIFY_STATUS_TOKEN_EXPIRED = 3;
-  VERIFY_STATUS_TOKEN_INVALID = 4;
+enum LogoutStatus {
+  LOGOUT_STATUS_UNKNOWN = 0;
+  LOGOUT_STATUS_OK = 1;
+  LOGOUT_STATUS_ERROR_UNKNOWN = 2;
+}
+
+enum UpdateStatus {
+  UPDATE_STATUS_UNKNOWN = 0;
+  UPDATE_STATUS_OK = 1;
+  UPDATE_STATUS_ERROR_UNKNOWN = 2;
+  UPDATE_STATUS_ERROR_USERNAME_INVALID = 3;
+  UPDATE_STATUS_ERROR_EMAIL_INVALID = 4;
 }
 
 enum RefreshStatus {
   REFRESH_STATUS_UNKNOWN = 0;
   REFRESH_STATUS_OK = 1;
-  REFRESH_STATUS_ERROR = 2;
-  REFRESH_STATUS_TOKEN_EXPIRED = 3;
-  REFRESH_STATUS_TOKEN_INVALID = 4;
+  REFRESH_STATUS_ERROR_UNKNOWN = 2;
+  REFRESH_STATUS_ERROR_TOKEN_INVALID = 3;
+  REFRESH_STATUS_ERROR_TOKEN_EXPIRED = 4;
 }
 
-enum RevokeStatus {
-  REVOKE_STATUS_UNKNOWN = 0;
-  REVOKE_STATUS_OK = 1;
-  REVOKE_STATUS_ERROR = 2;
+enum AccessStatus {
+  ACCESS_STATUS_UNKNOWN = 0;
+  ACCESS_STATUS_OK = 1;
+  ACCESS_STATUS_ERROR_UNKNOWN = 2;
+  ACCESS_STATUS_ERROR_TOKEN_INVALID = 3;
+  ACCESS_STATUS_ERROR_TOKEN_EXPIRED = 4;
+}
+
+enum ChangePasswordStatus {
+  CHANGE_PASSWORD_STATUS_UNKNOWN = 0;
+  CHANGE_PASSWORD_STATUS_OK = 1;
+  CHANGE_PASSWORD_STATUS_ERROR_UNKNOWN = 2;
+  CHANGE_PASSWORD_STATUS_ERROR_INVALID_PASSWORD = 3;
+  CHANGE_PASSWORD_STATUS_ERROR_INVALID_TOKEN = 4;
+}
+
+enum TokenType {
+  TOKEN_TYPE_UNKNOWN = 0;
+  TOKEN_TYPE_BEARER = 1;
+}
+
+enum TokenKind {
+  TOKEN_KIND_UNKNOWN = 0;
+  TOKEN_KIND_REFRESH = 1;
+  TOKEN_KIND_ACCESS = 2;
+  TOKEN_KIND_PASSWORD_RESET = 3; // TODO @gebhn: Not yet implemented.
+  TOKEN_KIND_EMAIL_VERIFICATION = 4; // TODO @gebhn: Not yet implemented.
 }
 
 message User {
   string user_id = 1;
   string username = 2;
   string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
 }
 
 message Token {
-  TokenKind kind = 1;
-  string value = 2;
-  string jti = 3;
-  string subject = 4;
-  google.protobuf.Timestamp expires_at = 5;
-  google.protobuf.Timestamp issued_at = 6;
+  TokenType token_type = 1;
+  TokenKind token_kind = 2;
+  string value = 3;
+  google.protobuf.Timestamp expires_at = 4;
 }
 
 message RegisterRequest {
@@ -98,11 +118,11 @@ message RegisterRequest {
 
 message RegisterResponse {
   RegisterStatus status = 1;
-  User user = 2;
+  string user_id = 2;
 }
 
 message LoginRequest {
-  oneof identifier {
+  oneof id {
     string username = 1;
     string email = 2;
   }
@@ -111,17 +131,31 @@ message LoginRequest {
 
 message LoginResponse {
   LoginStatus status = 1;
-  Token access_token = 2;
+  string user_id = 2;
   Token refresh_token = 3;
+  Token access_token = 4;
 }
 
-message VerifyRequest {
-  Token access_token = 1;
+message LogoutRequest {
+  string user_id = 1;
+  Token refresh_token = 2;
+  bool revoke_all = 3;
 }
 
-message VerifyResponse {
-  VerifyStatus status = 1;
-  User user = 2;
+message LogoutResponse {
+  LogoutStatus status = 1;
+  string user_id = 2;
+}
+
+message UpdateRequest {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message UpdateResponse {
+  UpdateStatus status = 1;
+  string user_id = 2;
 }
 
 message RefreshRequest {
@@ -130,23 +164,25 @@ message RefreshRequest {
 
 message RefreshResponse {
   RefreshStatus status = 1;
-  Token access_token = 2;
-  Token refresh_token = 3;
+  Token access_token = 3;
+  Token refresh_token = 4;
 }
 
-message RevokeRefreshRequest {
-  Token refresh_token = 1;
+message AccessRequest {
+  Token access_token = 1;
 }
 
-message RevokeAllRequest {
-  string user_id = 1;
+message AccessResponse {
+  AccessStatus status = 1;
+  User user = 2;
+  map<string, string> claims = 3; // TODO @gebhn: Should claims be defined?
 }
 
-message RevokeAccessRequest {
-  string jti = 1;
+message ChangePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
 }
 
-message RevokeResponse {
-  RevokeStatus status = 1;
-  google.protobuf.Timestamp revoked_at = 2;
+message ChangePasswordResponse {
+  ChangePasswordStatus status = 1;
 }

@@ -10,24 +10,20 @@ create table if not exists users (
 create table if not exists tokens (
   jti text primary key,
   user_id text not null references users(user_id) on delete cascade,
-  kind text not null check (kind in ('access', 'refresh', 'password_reset', 'email_verification')),
-  value text not null,
+  kind text not null check (kind in ('TOKEN_KIND_REFRESH', 'TOKEN_KIND_PASSWORD_RESET', 'TOKEN_KIND_EMAIL_VERIFICATION')),
+  token_hash text not null,
   issued_at timestamp not null,
+  revoked_at timestamp,
   expires_at timestamp not null,
   created_at timestamp not null default current_timestamp
-);
-
-create table if not exists revoked_tokens (
-  jti text primary key,
-  revoked_at timestamp not null default current_timestamp
 );
 
 create index if not exists idx_token_user_id on tokens(user_id);
 create index if not exists idx_token_expires_at on tokens(expires_at);
 create index if not exists idx_token_kind on tokens(kind);
 
-create index if not exists idx_user_email ON users(email);
-create index if not exists idx_user_username ON users(username);
+create index if not exists idx_user_email on users(email);
+create index if not exists idx_user_username on users(username);
 
 create trigger if not exists trigger_user_updated_at
 after update on users

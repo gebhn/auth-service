@@ -1,7 +1,6 @@
--- name: CreateToken :one
-insert into tokens (jti, user_id, kind, value, issued_at, expires_at)
-values (?, ?, ?, ?, ?, ?)
-returning *;
+-- name: CreateToken :exec
+insert into tokens (jti, user_id, kind, token_hash, issued_at, expires_at)
+values (?, ?, ?, ?, ?, ?);
 
 -- name: GetTokenByJTI :one
 select * from tokens

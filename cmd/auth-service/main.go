@@ -7,9 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/golang-migrate/migrate/v4"
+
 	"github.com/gebhn/auth-service/internal/config"
 	"github.com/gebhn/auth-service/internal/db"
-	"github.com/golang-migrate/migrate/v4"
 )
 
 func main() {
