@@ -18,21 +18,21 @@ func NewCacheRevokedList(c cache.Cache) *cacheRevokedList {
 	return &cacheRevokedList{c: c}
 }
 
-func (l *cacheRevokedList) Create(ctx context.Context, jti string, kind pb.TokenKind, exp time.Duration) error {
+func (r *cacheRevokedList) Create(ctx context.Context, jti string, kind pb.TokenKind, exp time.Duration) error {
 	if jti == "" {
 		return ErrInvalidKey
 	}
 	if exp.Abs() < config.GetTokenDuration(kind) {
 		return ErrInvalidDuration
 	}
-	if _, err := l.c.Set(ctx, jti, "1", exp); err != nil {
+	if _, err := r.c.Set(ctx, jti, "1", exp); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (l *cacheRevokedList) Find(ctx context.Context, jti string) (bool, error) {
-	v, err := l.c.Get(ctx, jti)
+func (r *cacheRevokedList) Find(ctx context.Context, jti string) (bool, error) {
+	v, err := r.c.Get(ctx, jti)
 	if err != nil {
 		return false, err
 	}

@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"log"
 
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	"github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 func NewLibsqlConn(connectionString, authToken string) *sql.DB {
-	conn, err := sql.Open("libsql", connectionString+"?authToken="+authToken)
+	driver, err := libsql.NewConnector(connectionString, libsql.WithAuthToken(authToken))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return conn
+
+	return sql.OpenDB(driver)
 }

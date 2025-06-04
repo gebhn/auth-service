@@ -29,5 +29,5 @@ create trigger if not exists trigger_user_updated_at
 after update on users
 for each row
 begin
-    update user set updated_at = current_timestamp where user_id = old.user_id;
+    update users set updated_at = current_timestamp where user_id = old.user_id;
 end;

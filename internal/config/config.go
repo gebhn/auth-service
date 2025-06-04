@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/gebhn/auth-service/api/pb"
 )
+
+var kinds = [5]time.Duration{
+	pb.TokenKind_TOKEN_KIND_UNKNOWN:            0,
+	pb.TokenKind_TOKEN_KIND_REFRESH:            getRefreshTokenDuration(),
+	pb.TokenKind_TOKEN_KIND_ACCESS:             getAccessTokenDuration(),
+	pb.TokenKind_TOKEN_KIND_PASSWORD_RESET:     0,
+	pb.TokenKind_TOKEN_KIND_EMAIL_VERIFICATION: 0,
+}
 
 func GetTursoDbUrl() string {
 	return readEnvVar("TURSO_DB_URL", "libsql://my-super-db.turso.io")
@@ -12,6 +22,14 @@ func GetTursoDbUrl() string {
 
 func GetTursoDbToken() string {
 	return readEnvVar("TURSO_DB_TOKEN", "super.secret_token")
+}
+
+func GetRedisAddress() string {
+	return readEnvVar("REDIS_ADDRESS", "localhost:6379")
+}
+
+func GetRedisPassword() string {
+	return readEnvVar("REDIS_PASSWORD", "password")
 }
 
 func GetGrpcServerPort() string {
@@ -34,11 +52,15 @@ func GetAccessTokenSecret() string {
 	return readEnvVar("ACCESS_TOKEN_SECRET", "is-it-secret-?-is-it-safe-?")
 }
 
-func GetRefreshTokenDuration() time.Duration {
+func GetTokenDuration(kind pb.TokenKind) time.Duration {
+	return kinds[kind]
+}
+
+func getRefreshTokenDuration() time.Duration {
 	return time.Hour * 24 * 7
 }
 
-func GetAccessTokenDuration() time.Duration {
+func getAccessTokenDuration() time.Duration {
 	return time.Minute * 5
 }
 

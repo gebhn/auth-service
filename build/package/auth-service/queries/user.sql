@@ -5,9 +5,9 @@ values (?, ?, ?, ?, current_timestamp, current_timestamp);
 -- name: UpdateUser :exec
 UPDATE users
 SET
-  username = COALESCE(sqlc.arg(username), username),
-  email = COALESCE(sqlc.arg(email), email),
-  password_hash = COALESCE(sqlc.arg(password_hash), password_hash)
+  username = COALESCE(NULLIF(sqlc.arg(username), ''), username),
+  email = COALESCE(NULLIF(sqlc.arg(email), ''), email),
+  password_hash = COALESCE(NULLIF(sqlc.arg(password_hash), ''), password_hash)
 WHERE
   user_id = sqlc.arg(user_id);
 
