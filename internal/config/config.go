@@ -36,10 +36,6 @@ func GetGrpcServerPort() string {
 	return readEnvVar("GRPC_SERVER_PORT", "50051")
 }
 
-func GetMigrationDir() string {
-	return readEnvVar("MIGRATION_DIR", "file:///build/package/service/migrations/")
-}
-
 func GetServiceName() string {
 	return readEnvVar("SERVICE_NAME", "auth-service-1")
 }

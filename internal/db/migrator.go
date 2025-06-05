@@ -7,9 +7,10 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 
-	"github.com/gebhn/auth-service/internal/config"
+	"github.com/gebhn/auth-service/build/package/auth-service/migrations"
 )
 
 func NewMigrator(conn *sql.DB) *migrate.Migrate {
@@ -17,7 +18,13 @@ func NewMigrator(conn *sql.DB) *migrate.Migrate {
 	if err != nil {
 		log.Fatal(err)
 	}
-	m, err := migrate.NewWithDatabaseInstance(config.GetMigrationDir(), "sqlite", driver)
+
+	src, err := iofs.New(migrations.FS, ".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m, err := migrate.NewWithInstance("iofs", src, "sqlite", driver)
 	if err != nil {
 		log.Fatal(err)
 	}

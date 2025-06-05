@@ -21,22 +21,22 @@ func NewSqlStore(db *sql.DB) *sqlStore {
 	}
 }
 
-func (s *sqlStore) ExecTx(ctx context.Context, fn func(queries *sqlc.Queries) error) error {
+func (s *sqlStore) ExecTx(ctx context.Context, fn func(store Store) error) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
-	q := sqlc.New(tx)
+	txStore := s.newTxStore(tx)
 
-	if err := fn(q); err != nil {
+	if err := fn(txStore); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("transaction failed: %w, rollback failed: %v", err, rbErr)
 		}
 		return fmt.Errorf("transaction failed: %w", err)
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (s *sqlStore) CreateUser(ctx context.Context, p sqlc.CreateUserParams) error {
@@ -50,7 +50,10 @@ func (s *sqlStore) CreateUser(ctx context.Context, p sqlc.CreateUserParams) erro
 }
 
 func (s *sqlStore) UpdateUser(ctx context.Context, p sqlc.UpdateUserParams) error {
-	if p.UserID == "" || (p.Username == "" && p.Email == "") {
+	invalidUsername := p.Username == "" || p.Username == nil
+	invalidEmail := p.Email == "" || p.Email == nil
+
+	if p.UserID == "" || (invalidUsername && invalidEmail) {
 		return fmt.Errorf("failed to update user: %w", ErrInvalidInput)
 	}
 	if err := s.Queries.UpdateUser(ctx, p); err != nil {
@@ -99,6 +102,9 @@ func (s *sqlStore) CreateToken(ctx context.Context, p sqlc.CreateTokenParams) er
 	if p.IssuedAt.Compare(time.Now()) > 0 {
 		return fmt.Errorf("failed to create token: %w", ErrInvalidInput)
 	}
+	if p.ExpiresAt.Compare(time.Now()) <= 0 {
+		return fmt.Errorf("failed to create token: %w", ErrInvalidInput)
+	}
 	if err := s.Queries.CreateToken(ctx, p); err != nil {
 		return fmt.Errorf("failed to create token: %w", err)
 	}
@@ -124,5 +130,15 @@ func (s *sqlStore) GetTokensForUser(ctx context.Context, userID string) ([]*sqlc
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tokens for user %s: %w", userID, err)
 	}
+	if len(tokens) == 0 {
+		return nil, sql.ErrNoRows
+	}
 	return tokens, nil
+}
+
+func (s *sqlStore) newTxStore(tx *sql.Tx) *sqlStore {
+	return &sqlStore{
+		db:      s.db,
+		Queries: sqlc.New(tx),
+	}
 }
