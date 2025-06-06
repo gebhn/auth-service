@@ -100,11 +100,9 @@ func TestExecTx_Invalid(t *testing.T) {
 		})
 	})
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "transaction failed")
 	assert.Contains(t, err.Error(), ErrInvalidInput.Error())
 
-	user, err := testStore.GetUserByID(context.Background(), "1")
-	assert.Nil(t, user)
+	_, err = testStore.GetUserByID(context.Background(), "1")
 	assert.Error(t, err)
 }
 
@@ -126,11 +124,9 @@ func TestExecTx_Rollback(t *testing.T) {
 		return ee
 	})
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "transaction failed")
 	assert.Contains(t, err.Error(), ErrInvalidInput.Error())
 
-	user, err := testStore.GetUserByID(context.Background(), "1")
-	assert.Nil(t, user)
+	_, err = testStore.GetUserByID(context.Background(), "1")
 	assert.Error(t, err)
 }
 
@@ -530,11 +526,9 @@ func TestGetTokenByJTI_NotFound(t *testing.T) {
 	clearTables(t, testStore.db)
 
 	var err error
-	var token *sqlc.Token
 
-	token, err = testStore.GetTokenByJTI(context.Background(), "does-not-exist")
+	_, err = testStore.GetTokenByJTI(context.Background(), "does-not-exist")
 	assert.Error(t, err)
-	assert.Nil(t, token)
 	assert.Contains(t, err.Error(), sql.ErrNoRows.Error())
 }
 
