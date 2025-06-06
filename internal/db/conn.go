@@ -8,7 +8,12 @@ import (
 )
 
 func NewLibsqlConn(connectionString, authToken string) *sql.DB {
-	driver, err := libsql.NewConnector(connectionString, libsql.WithAuthToken(authToken))
+	opts := []libsql.Option{}
+	if authToken != "" {
+		opts = append(opts, libsql.WithAuthToken(authToken))
+	}
+
+	driver, err := libsql.NewConnector(connectionString, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,13 +3,11 @@ package store
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -23,26 +21,14 @@ import (
 var testStore *sqlStore
 
 func TestMain(m *testing.M) {
-	c, err := sql.Open("libsql", "file::memory:?cache=shared")
-	if err != nil {
-		log.Fatalf("failed to open database: %v", err)
-	}
+	c := db.NewLibsqlConn("file::memory:?cache=shared", "")
 	defer c.Close()
 
 	migrator := db.NewMigrator(c)
 
 	if err := migrator.Up(); err != nil {
-		if !errors.Is(err, migrate.ErrNoChange) {
-			log.Fatal(err)
-		}
+		log.Fatal(err)
 	}
-	defer func() {
-		if err := migrator.Down(); err != nil {
-			if !errors.Is(err, migrate.ErrNoChange) {
-				log.Fatal(err)
-			}
-		}
-	}()
 
 	testStore = NewSqlStore(c)
 
@@ -52,7 +38,7 @@ func TestMain(m *testing.M) {
 func clearTables(t *testing.T, db *sql.DB) {
 	t.Helper()
 
-	_, err := db.Exec("DELETE FROM tokens; DELETE FROM users;")
+	_, err := db.Exec("delete from tokens; delete from users;")
 	require.NoError(t, err, "failed to clear tables")
 }
 

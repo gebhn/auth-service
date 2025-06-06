@@ -41,7 +41,7 @@ $(BINDIR)/$(BIN): $(GOSRC)
 
 .PHONY: test
 test:
-	go test -race -v -count=$(COUNT) ./...
+	go test -race -v -coverprofile=$(BINDIR)/coverage.out -count=$(COUNT) ./...
 
 # -----------------------------------------------------------------
 #  generate

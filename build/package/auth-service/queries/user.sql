@@ -3,12 +3,12 @@ insert into users (user_id, username, email, password_hash, created_at, updated_
 values (?, ?, ?, ?, current_timestamp, current_timestamp);
 
 -- name: UpdateUser :exec
-UPDATE users
-SET
-  username = COALESCE(NULLIF(sqlc.arg(username), ''), username),
-  email = COALESCE(NULLIF(sqlc.arg(email), ''), email),
-  password_hash = COALESCE(NULLIF(sqlc.arg(password_hash), ''), password_hash)
-WHERE
+update users
+set
+  username = coalesce(nullif(sqlc.arg(username), ''), username),
+  email = coalesce(nullif(sqlc.arg(email), ''), email),
+  password_hash = coalesce(nullif(sqlc.arg(password_hash), ''), password_hash)
+where
   user_id = sqlc.arg(user_id);
 
 -- name: GetUserByID :one
