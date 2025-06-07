@@ -103,7 +103,7 @@ func (s *sqlStore) GetTokensForUser(ctx context.Context, userID string) ([]*sqlc
 	}
 	tokens, err := s.Queries.GetTokensForUser(ctx, userID)
 	if err != nil {
-		return nil, ErrInvalidInput
+		return nil, err
 	}
 	if len(tokens) == 0 {
 		return nil, sql.ErrNoRows
