@@ -41,7 +41,12 @@ $(BINDIR)/$(BIN): $(GOSRC)
 
 .PHONY: test
 test:
+	mkdir -p $(BINDIR)
 	go test -race -v -coverprofile=$(BINDIR)/coverage.out -count=$(COUNT) ./...
+
+.PHONY: see
+see:
+	go tool cover -html=./bin/coverage.out
 
 # -----------------------------------------------------------------
 #  generate
