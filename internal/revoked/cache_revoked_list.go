@@ -32,6 +32,9 @@ func (r *cacheRevokedList) Create(ctx context.Context, jti string, kind pb.Token
 }
 
 func (r *cacheRevokedList) Find(ctx context.Context, jti string) (bool, error) {
+	if jti == "" {
+		return false, ErrInvalidKey
+	}
 	v, err := r.c.Get(ctx, jti)
 	if err != nil {
 		return false, err

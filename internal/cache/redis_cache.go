@@ -33,3 +33,7 @@ func (r *redisCache) Get(ctx context.Context, key string) (string, error) {
 	}
 	return r.c.Get(ctx, key).Result()
 }
+
+func (r *redisCache) Close() error {
+	return r.c.Close()
+}
