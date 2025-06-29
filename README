@@ -44,7 +44,7 @@ build process is very simple:
 |                                                                              |
 +------------------------------------------------------------------------------+
 
-[002] Running
+[003] Running
 ________________________________________________________________________________
 
 The service assumes access to a running instance of Redis and Libsql. You may
@@ -62,7 +62,7 @@ wish to run these locally via Docker:
 See the associated documentation for more information regarding Redis and Libsql
 respectively.
 
-[003] Testing
+[004] Testing
 ________________________________________________________________________________
 
 Testing is similarly simple and also requires a valid .env file:
@@ -74,13 +74,13 @@ Testing is similarly simple and also requires a valid .env file:
 |                                                                              |
 +------------------------------------------------------------------------------+
 
-[004] Contributing
+[005] Contributing
 ________________________________________________________________________________
 
 Pull requests should be opened for review with individual commits and follow the
 conventional commits guidelines.
 
-[005] License
+[006] License
 ________________________________________________________________________________
 
 The project is free and open source, available under the GPL License.
